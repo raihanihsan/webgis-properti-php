@@ -1,5 +1,12 @@
 <?php 
-    require 'connection.php';
+	require 'connection.php';
+	session_start();
+	if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true) {
+		echo "Welcome to the member's area, " . $_SESSION['username'] . "!";
+	} else {
+		echo "<script type='text/javascript'>alert('Please login first to see this page')</script>";
+		header( 'Location: index.php' );
+	}
 ?>
 <!DOCTYPE html>
 <html>
@@ -9,6 +16,7 @@
 	<link rel="stylesheet" href="ol.css" type="text/css">
 	<script src="ol.js" type="text/javascript"></script>
 	<link rel="stylesheet" href="css/bootstrap.min.css" > 
+	<link href="https://fonts.googleapis.com/css?family=Roboto|Varela+Round" rel="stylesheet">
 
 	<script src="https://ajax.aspnetcdn.com/ajax/jQuery/jquery-3.4.1.min.js"></script>
 
@@ -66,11 +74,114 @@
       .ol-popup-closer:after {
         content: "✖";
       }
+	  body {
+		font-family: 'Varela Round', sans-serif;
+	}
+	.modal-login {
+		width: 320px;
+	}
+	.modal-login .modal-content {
+		border-radius: 1px;
+		border: none;
+	}
+	.modal-login .modal-header {
+        position: relative;
+		justify-content: center;
+        background: #f2f2f2;
+	}
+    .modal-login .modal-body {
+        padding: 30px;
+    }
+    .modal-login .modal-footer {
+        background: #f2f2f2;
+    }
+	.modal-login h4 {
+		text-align: center;
+		font-size: 26px;
+	}
+    .modal-login label {
+        font-weight: normal;
+        font-size: 13px;
+    }
+	.modal-login .form-control, .modal-login .btn {
+		min-height: 38px;
+		border-radius: 2px; 
+	}
+	.modal-login .hint-text {
+		text-align: center;
+	}
+	.modal-login .close {
+        position: absolute;
+		top: 15px;
+		right: 15px;
+	}
+    .modal-login .checkbox-inline {
+        margin-top: 12px;
+    }
+    .modal-login input[type="checkbox"]{
+        margin-top: 2px;
+    }
+	.modal-login .btn {
+        min-width: 100px;
+		background: #3498db;
+		border: none;
+		line-height: normal;
+	}
+	.modal-login .btn:hover, .modal-login .btn:focus {
+		background: #248bd0;
+	}
+	.modal-login .hint-text a {
+		color: #999;
+	}
+	.trigger-btn {
+		display: inline-block;
+		margin: 100px auto;
+	}
 
-    </style>
+	</style>
+	<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+	<a class="navbar-brand" href="#">Admin Page</a>
+	<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+		<span class="navbar-toggler-icon"></span>
+	</button>
+
+	<div class="collapse navbar-collapse" id="navbarSupportedContent">
+		<ul class="navbar-nav mr-auto">
+		<li class="nav-item active">
+			<a class="nav-link" href="#">Home <span class="sr-only">(current)</span></a>
+		</li>
+		
+		<!-- <li class="nav-item">
+			<a class="nav-link" href="#">Link</a>
+		</li>
+		<li class="nav-item dropdown">
+			<a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+			Dropdown
+			</a>
+			<div class="dropdown-menu" aria-labelledby="navbarDropdown">
+			<a class="dropdown-item" href="#">Action</a>
+			<a class="dropdown-item" href="#">Another action</a>
+			<div class="dropdown-divider"></div>
+			<a class="dropdown-item" href="#">Something else here</a>
+			</div>
+		</li>
+		<li class="nav-item">
+			<a class="nav-link disabled" href="#" tabindex="-1" aria-disabled="true">Disabled</a>
+		</li> -->
+		<li class="nav-item">
+			<a class="nav-link"  href="logout.php">Logout</a>
+		</li>
+		</ul>
+		
+		<form class="form-inline my-2 my-lg-0">
+		<input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">
+		<button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
+		</form>
+	</div>
+	</nav>
 </head>
 <body>
-<h2>My Map</h2>
+
 <select id="cbo_layer" onchange="chg_layer(this.value)">
 	<option value="osm">OSM</option>
 	<option value="bing_aerial">Bing Aerial</option>
@@ -81,7 +192,7 @@
 		<option value="106.837571|-6.194148|12">Jakarta</option>
 		<option value="115.184117|-8.324274|10">Bali</option>
 </select> -->
-<input type="checkBox" value="1" checked="1" onclick='toggle_kec()'/>kecamatan
+<!-- <input type="checkBox" value="1" checked="1" onclick='toggle_kec()'/>kecamatan -->
 
 <div class="row">
 	<div class="col-lg-8">
@@ -270,6 +381,18 @@
 			opacity: 0.8
 		})
 	});
+	var stroke_hitam = new ol.style.Stroke({
+		color : 'rgba(255,0,0,1.0)',
+		width : 1    
+	});
+
+	var fill_merah = new ol.style.Fill({
+		color: 'rgba(255,0,0,1.0)'
+	});
+	var style_rumah = new ol.style.Style({
+		stroke: stroke_hitam,
+		fill: fill_merah
+	});
 	var bing_aerial = new ol.layer.Tile({
 		source: new ol.source.BingMaps({
 			key: 'As1HiMj1PvLPlqc_gtM7AqZfBL8ZL3VrjaS3zIb22Uvb9WKhuJObROC-qUpa81U5',
@@ -369,6 +492,10 @@
 			}
 		};
 
+	
+
+	
+
 	var style_poi = function () {
 		return function (feature, resolution) {
 			
@@ -399,36 +526,7 @@
 	      });
 	// END LAYER POINT ------------------------------------------
 
-	var vector_mall = new ol.layer.Vector({
-    	source: new ol.source.Vector({
-    		features: arr_point_mall
-    	}),
-    	style: style_icon_mall
-	});
-	var vector_sekolah = new ol.layer.Vector({
-    	source: new ol.source.Vector({
-    		features: arr_point_sekolah
-    	}),
-    	style: style_icon_sekolah
-	});
-	var vector_pasar = new ol.layer.Vector({
-    	source: new ol.source.Vector({
-    		features: arr_point_pasar
-    	}),
-    	style: style_icon_pasar
-	});
-	var vector_tmptwisata = new ol.layer.Vector({
-    	source: new ol.source.Vector({
-    		features: arr_point_tmptwisata
-    	}),
-    	style: style_icon_tmptwisata
-	});
-	var vector_restoran = new ol.layer.Vector({
-    	source: new ol.source.Vector({
-    		features: arr_point_restoran
-    	}),
-    	style: style_icon_restoran
-    });
+	
 	// START LAYER LINESTRING ------------------------------------------
 	// <?php 
 	// $sql = "SELECT * from contoh_line";
@@ -455,30 +553,65 @@
 	// END LAYER LINESTRING ------------------------------------------
 
 
-	// START LAYER POLYGON ------------------------------------------
-	// <?php 
-	// $sql = "SELECT * from contoh_polygon";
-	// $result = $conn->query($sql);
-	// $i=0;
-	// while($r = $result->fetch_assoc()) {  
-	// ?>
-	//   feature = format.readFeature('<?php echo $r['geom'] ?>', {
-	//         dataProjection: 'EPSG:4326',
-	//         featureProjection: 'EPSG:3857'
-	//       });
-	//   feature.set('info','<?php echo $r['keterangan'] ?>');
-	//   features_polygon[<?php echo $i ?>]=feature;       
-	// <?php
-	//    $i++;  
-	//   }
-	// ?> 
-	// var source_poly=new  ol.source.Vector({
-	//           features: features_polygon
-	//         });
-	// var contoh_polygon = new ol.layer.Vector({
-	//         source: source_poly
-	//       });
-	// END LAYER POLYGON ------------------------------------------
+	//START LAYER POLYGON ------------------------------------------
+	<?php 
+	$sql = "SELECT * from properti";
+	$result = $conn->query($sql);
+	$i=0;
+	while($r = $result->fetch_assoc()) {  
+	?>
+	  feature = format.readFeature('<?php echo $r['geom'] ?>', {
+	        dataProjection: 'EPSG:4326',
+	        featureProjection: 'EPSG:3857'
+		  });
+	  feature.set('foto','<?php echo $r['foto'] ?>');
+	  feature.set('id','<?php echo $r['id'] ?>');
+	  feature.set('alamat','<?php echo $r['alamat'] ?>');
+	  feature.set('harga','<?php echo $r['harga'] ?>');
+	  feature.set('jenis','<?php echo $r['jenis'] ?>');
+	  features_polygon[<?php echo $i ?>]=feature;       
+	<?php
+	   $i++;  
+	  }
+	?> 
+	var style_properti = function () {
+		return function (feature, resolution) {
+			
+			if (feature.get('jenis') == 'Rumah') {
+				return [style_rumah];
+			} 
+		};
+	};
+	var source_poly=new  ol.source.Vector({
+	          features: features_polygon
+	        });
+	var lokasi_properti = new ol.layer.Vector({
+			source: source_poly,
+			style: style_properti()
+		  });
+		  
+	
+	var infoProperti = function(pixel) {
+		
+		var feature = map.forEachFeatureAtPixel(pixel, function(feature) {
+			return feature;
+			});
+			if (feature) {
+			content.innerHTML =  feature.get('foto') 
+			+ '<br>'
+			+ feature.get('alamat')
+			+ '<br>'
+			+ 'Rp. '
+			+ feature.get('harga')
+			+ '<br>'
+			+ '<a href="detailproperti/'+feature.get('id')+'"' 
+			+ '> LINK </a>'
+			+ '<br>';
+			} else {
+			content.innerHTML = 'tidak ada lokasi terpilih';
+			}
+	};
+	//END LAYER POLYGON ------------------------------------------
 
 	var map = new ol.Map({
 		target: 'map',
@@ -499,6 +632,7 @@
 			, bing_road
 			, kecamatan
 			, lokasi_poi
+			, lokasi_properti
 		],
 		view: view1
 	}); 
@@ -623,10 +757,17 @@
 
 	// }
 	function simpan_poly(){
+		var kategori = $('#kategori_poly').val();
+		var jenis = $('#jenis_poly').val();
+		var harga = $('#harga_poly').val();
+		var alamat = $('#alamat_poly').val();
+		var lt = $('#lt_poly').val();
+		var lb = $('#lb_poly').val();
+		var gambar = $('#gambar_poly').val();
 		var keterangan = $('#keterangan_poly').val();
 		var wkt = $('#wkt_poly').val();
  
-		var url ="simpan_poly.php?keterangan="+keterangan+'&wkt='+wkt;
+		var url ="simpan_poly.php?keterangan="+ keterangan + '&wkt=' + wkt + '&kategori=' + kategori + '&jenis=' + jenis + '&harga=' + harga + '&alamat=' + alamat + '&lt=' + lt + '&lb=' + lb + '&gambar=' + gambar;
 	    $.ajax({
 	        url: url,
 	        success: function(data){
@@ -644,7 +785,7 @@
 	}
 	map.on('singleclick', function(evt) {
         var coordinate = evt.coordinate;
-        infoLokasi(evt.pixel);
+        infoProperti(evt.pixel);
         overlay.setPosition(coordinate);
       });
 
