@@ -9,9 +9,10 @@
 	$alamat = $_GET['alamat'];
     $lt = $_GET['lt'];
 	$lb = $_GET['lb'];
-	$gambar = $_GET['gambar'];
+    $gambar = $_GET['gambar'];
+	$status = $_GET['status'];
 
-    $sql = "INSERT INTO properti(kategori,jenis,harga,alamat,lt,lb,foto,keterangan,geom) values('$kategori','$jenis','$harga','$alamat','$lt','$lb','$foto','$keterangan','$wkt')";
+    $sql = "INSERT INTO properti(kategori,jenis,harga,alamat,lt,lb,foto,keterangan,geom,status) values('$kategori','$jenis','$harga','$alamat','$lt','$lb','$foto','$keterangan','$wkt','$status')";
     if($conn->query($sql)){
         echo "data berhasil tersimpan";
     }else

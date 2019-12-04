@@ -1,5 +1,9 @@
 <?php 
     require 'connection.php';
+
+    if(!empty($_GET['page']) && $_GET['page'] == 'detailproperti') {
+        include('detailproperti.php');
+    }
 ?>
 <!DOCTYPE html>
 <html>
@@ -280,10 +284,38 @@
 
 	var fill_merah = new ol.style.Fill({
 		color: 'rgba(255,0,0,1.0)'
+    });
+    var fill_hijau = new ol.style.Fill({
+		color: 'rgba(0,128,0,1.0)'
+	});
+	var fill_biru = new ol.style.Fill({
+		color: 'rgba(0,0,255,1.0)'
+	});
+	var fill_coklat = new ol.style.Fill({
+		color: 'rgba(165,42,42,1.0)'
+	});
+	var fill_kuning = new ol.style.Fill({
+		color: 'rgba(255,255,0,1.0)'
 	});
 	var style_rumah = new ol.style.Style({
 		stroke: stroke_hitam,
 		fill: fill_merah
+    });
+    var style_ruko = new ol.style.Style({
+		stroke: stroke_hitam,
+		fill: fill_hijau
+	});
+	var style_gudang = new ol.style.Style({
+		stroke: stroke_hitam,
+		fill: fill_biru
+	});
+	var style_kantor = new ol.style.Style({
+		stroke: stroke_hitam,
+		fill: fill_kuning
+	});
+	var style_tanah = new ol.style.Style({
+		stroke: stroke_hitam,
+		fill: fill_coklat
 	});
 	var bing_aerial = new ol.layer.Tile({
 		source: new ol.source.BingMaps({
@@ -447,7 +479,7 @@
 
 	//START LAYER POLYGON ------------------------------------------
 	<?php 
-	$sql = "SELECT * from properti";
+	$sql = "SELECT * from properti where status = 'Belum Laku'";
 	$result = $conn->query($sql);
 	$i=0;
 	while($r = $result->fetch_assoc()) {  
@@ -461,6 +493,7 @@
 	  feature.set('alamat','<?php echo $r['alamat'] ?>');
 	  feature.set('harga','<?php echo $r['harga'] ?>');
 	  feature.set('jenis','<?php echo $r['jenis'] ?>');
+	  feature.set('status','<?php echo $r['status'] ?>');
 	  features_polygon[<?php echo $i ?>]=feature;       
 	<?php
 	   $i++;  
@@ -471,7 +504,18 @@
 			
 			if (feature.get('jenis') == 'Rumah') {
 				return [style_rumah];
-			} 
+			} else if (feature.get('jenis') == 'Ruko') {
+				return [style_ruko];
+			}
+			else if (feature.get('jenis') == 'Gudang') {
+				return [style_gudang];
+			}
+			else if (feature.get('jenis') == 'Tanah') {
+				return [style_tanah];
+			}
+			else if (feature.get('jenis') == 'Kantor') {
+				return [style_kantor];
+			}
 		};
 	};
 	var source_poly=new  ol.source.Vector({
@@ -489,14 +533,14 @@
 			return feature;
 			});
 			if (feature) {
-			content.innerHTML =  feature.get('foto') 
+			content.innerHTML =  feature.get('jenis') 
 			+ '<br>'
 			+ feature.get('alamat')
 			+ '<br>'
 			+ 'Rp. '
 			+ feature.get('harga')
 			+ '<br>'
-			+ '<a href="detailproperti/'+feature.get('id')+'"' 
+			+ '<a href="detailproperti.php?id='+feature.get('id')+'"' 
 			+ '> LINK </a>'
 			+ '<br>';
 			} else {

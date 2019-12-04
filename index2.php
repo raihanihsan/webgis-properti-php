@@ -198,7 +198,7 @@
 	<div class="col-lg-8">
 		<div class="map" id="map" style="width: 100%; height: 550px;"></div>
 	</div>
-	<div class="col-lg-3" style="background-color: cyan"> 
+	<div class="col-lg-3" style="background-color: 6ba8a9"> 
 		<!-- START DIGIT POINT ----------------------------------------------- -->
 		<form>
 			<h3>Manajemen Data POI</h3>
@@ -268,6 +268,13 @@
 				<select class="form-control" id="kategori_poly">
 				<option>Jual</option>
 				<option>Sewa</option>
+				</select>
+			</div>
+			<div class="form-group">
+				<label for="exampleFormControlSelect1">Status</label>
+				<select class="form-control" id="status_poly">
+				<option>Sudah Laku</option>
+				<option>Belum Laku</option>
 				</select>
 			</div>
 			<div class="form-group">
@@ -381,17 +388,60 @@
 			opacity: 0.8
 		})
 	});
-	var stroke_hitam = new ol.style.Stroke({
-		color : 'rgba(255,0,0,1.0)',
+	var stroke_pink = new ol.style.Stroke({
+		color : 'rgba(205,0,205,1.0)',
 		width : 1    
 	});
-
+	var stroke_hijau = new ol.style.Stroke({
+		color : 'rgba(26,72,51,1.0)',
+		width : 1    
+	});
+	var stroke_hijau2 = new ol.style.Style({
+		fill : 'rgba(26,72,51,1.0)',
+		stroke : stroke_hijau  
+	});
+	var stroke_pink2 = new ol.style.Style({
+		fill : 'rgba(205,0,205,1.0)',
+		stroke : stroke_pink 
+	});
+	var fill_pink = new ol.style.Fill({
+		color: 'rgba(205,0,205,1.0)'
+	});
 	var fill_merah = new ol.style.Fill({
 		color: 'rgba(255,0,0,1.0)'
 	});
+	var fill_hijau = new ol.style.Fill({
+		color: 'rgba(0,128,0,1.0)'
+	});
+	var fill_biru = new ol.style.Fill({
+		color: 'rgba(0,0,255,1.0)'
+	});
+	var fill_coklat = new ol.style.Fill({
+		color: 'rgba(165,42,42,1.0)'
+	});
+	var fill_kuning = new ol.style.Fill({
+		color: 'rgba(255,255,0,1.0)'
+	});
+	var style_pink = new ol.style.Style({
+		fill: fill_pink
+	});
+	var style_hijau = new ol.style.Style({
+		fill: fill_hijau
+	});
 	var style_rumah = new ol.style.Style({
-		stroke: stroke_hitam,
 		fill: fill_merah
+	});
+	var style_ruko = new ol.style.Style({
+		fill: fill_hijau
+	});
+	var style_gudang = new ol.style.Style({
+		fill: fill_biru
+	});
+	var style_kantor = new ol.style.Style({
+		fill: fill_kuning
+	});
+	var style_tanah = new ol.style.Style({
+		fill: fill_coklat
 	});
 	var bing_aerial = new ol.layer.Tile({
 		source: new ol.source.BingMaps({
@@ -481,7 +531,7 @@
 	var infoLokasi = function(pixel) {
 			var feature = map.forEachFeatureAtPixel(pixel, function(feature) {
 			return feature;
-			});
+			})
 			if (feature) {
 			content.innerHTML =  feature.get('jenis') 
 			+ '<br>'
@@ -569,27 +619,60 @@
 	  feature.set('alamat','<?php echo $r['alamat'] ?>');
 	  feature.set('harga','<?php echo $r['harga'] ?>');
 	  feature.set('jenis','<?php echo $r['jenis'] ?>');
+	  feature.set('status','<?php echo $r['status'] ?>');
 	  features_polygon[<?php echo $i ?>]=feature;       
 	<?php
 	   $i++;  
 	  }
 	?> 
+	// var style_properti = function () {
+	// 	return function (feature, resolution) {
+			
+	// 		if (feature.get('jenis') == 'Rumah') {
+	// 			return [style_rumah];
+	// 		} else if (feature.get('jenis') == 'Ruko') {
+	// 			return [style_ruko];
+	// 		}
+	// 		else if (feature.get('jenis') == 'Gudang') {
+	// 			return [style_gudang];
+	// 		}
+	// 		else if (feature.get('jenis') == 'Tanah') {
+	// 			return [style_tanah];
+	// 		}
+	// 		else if (feature.get('jenis') == 'Kantor') {
+	// 			return [style_kantor];
+	// 		}
+	// 	};
+	// };
 	var style_properti = function () {
 		return function (feature, resolution) {
 			
-			if (feature.get('jenis') == 'Rumah') {
-				return [style_rumah];
-			} 
+			if (feature.get('status') == 'Sudah Laku') {
+				return [style_pink];
+			} else {
+				return [style_hijau];
+			}
 		};
 	};
+	var stroke_properti = function() {
+		return function (feature, resolution) {
+			if (feature.get('status') == 'Sudah Laku') {
+				return [stroke_hijau2];
+			} else {
+				return [stroke_pink2];
+			}
+		}
+	}
 	var source_poly=new  ol.source.Vector({
 	          features: features_polygon
 	        });
 	var lokasi_properti = new ol.layer.Vector({
 			source: source_poly,
 			style: style_properti()
+			
 		  });
 		  
+	
 	
 	var infoProperti = function(pixel) {
 		
@@ -597,6 +680,7 @@
 			return feature;
 			});
 			if (feature) {
+
 			content.innerHTML =  feature.get('foto') 
 			+ '<br>'
 			+ feature.get('alamat')
@@ -604,7 +688,7 @@
 			+ 'Rp. '
 			+ feature.get('harga')
 			+ '<br>'
-			+ '<a href="detailproperti/'+feature.get('id')+'"' 
+			+ '<a href="detailproperti.php?id='+feature.get('id')+'"' 
 			+ '> LINK </a>'
 			+ '<br>';
 			} else {
@@ -765,9 +849,10 @@
 		var lb = $('#lb_poly').val();
 		var gambar = $('#gambar_poly').val();
 		var keterangan = $('#keterangan_poly').val();
+		var status = $('#status_poly').val();
 		var wkt = $('#wkt_poly').val();
  
-		var url ="simpan_poly.php?keterangan="+ keterangan + '&wkt=' + wkt + '&kategori=' + kategori + '&jenis=' + jenis + '&harga=' + harga + '&alamat=' + alamat + '&lt=' + lt + '&lb=' + lb + '&gambar=' + gambar;
+		var url ="simpan_poly.php?keterangan="+ keterangan + '&wkt=' + wkt + '&kategori=' + kategori + '&jenis=' + jenis + '&harga=' + harga + '&alamat=' + alamat + '&lt=' + lt + '&lb=' + lb + '&gambar=' + gambar + '&status=' + status;
 	    $.ajax({
 	        url: url,
 	        success: function(data){
